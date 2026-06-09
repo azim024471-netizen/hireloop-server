@@ -75,6 +75,41 @@ app.get('/api/jobs', async(req, res)=>{
 
   // application api     ////////////////////////////
 
+
+  // app.get('/api/applications' , async(req, res)=>{
+  //   const query = {};
+
+  //   if(req.query.applicantId){
+  //     query.applicantId = req.query.applicantId
+  //   }
+    
+  //   if(req.query.jobId){
+  //     query.jobId = req.query.jobId
+  //   }
+
+  //   const result= await applicationCollection.find(query).toArray();
+  //   res.send(result)
+
+  // })
+
+
+
+  app.get('/api/applications', async (req, res) => {
+  const { applicantId, jobId } = req.query;
+
+  const condition = {};
+
+  if (applicantId) condition.applicantId = applicantId;
+  if (jobId) condition.jobId = jobId;
+
+  const result = await applicationCollection.find(condition).toArray();
+  res.send(result);
+});
+
+
+
+
+
   app.post('/api/applications', async(req, res)=>{
     const application = req.body;
     const newApplication = {
@@ -83,6 +118,17 @@ app.get('/api/jobs', async(req, res)=>{
     const result = await applicationCollection.insertOne(newApplication);
     res.send(result)
   })
+
+
+
+
+
+
+
+
+
+
+
 
     // company releted api ////////////////////////////
 
