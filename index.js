@@ -30,7 +30,9 @@ async function run() {
     const jobsCollection = database.collection("jobs");
     const companyCollection = database.collection('companies')
     const applicationCollection = database.collection('applications')
-
+    const planCollection = database.collection('plans')
+    const subcribstionCollection = database.collection('subcribetion')
+        const usersCollection = database.collection("user");
 
 
 // jobs api //////////////////////////////////////////
@@ -114,18 +116,89 @@ app.get('/api/jobs', async(req, res)=>{
     const application = req.body;
     const newApplication = {
       ...application,
-            createdAt : new Date() }
+            createdAt : new Date()
+           }
     const result = await applicationCollection.insertOne(newApplication);
     res.send(result)
   })
 
 
 
+  // plans api  iiiiiiiiiiiiiiiii /////////////
+
+  app.get('/api/plans', async(req, res)=>{
+    const condition = {}
+    if(req.query.plan_id){
+      condition.id= req.query.plan_id
+    }
+
+    const plan = await planCollection.findOne(condition);
+    res.send(plan)
+  })
+
+  // subcribetion api ///////////
+
+  app.post('/api/subcribtion' , async(req, res)=>{
+    const data = req.body
+    const subsInfo = {
+      ...data,
+            createdAt : new Date()
+    }
+    const result = await subcribstionCollection.insertOne(subsInfo)
+
+
+    const filter = {email:data.email}
+
+    const updateDocument ={
+      $set: {
+  plan: data.planId // বা ফ্রন্টএন্ড অনুযায়ী সঠিক স্পেলিং
+}
+    }
+   
+     const updateDocumentResult = await usersCollection.updateOne(filter,updateDocument)
+
+     
+
+    res.send(updateDocumentResult)
+  })
 
 
 
+// // subscription api ///////////
+// app.post('/api/subcribtion', async (req, res) => {
+//   try {
+//     const data = req.body;
+    
+//     const subsInfo = {
+//       ...data,
+//       createdAt: new Date()
+//     };
+//     const result = await subcribstionCollection.insertOne(subsInfo);
+
+//     const filter = { email: data.email };
+
+//     const updateDocument = {
+//       $set: {
+//         plan: data.planId 
+//       },
+//     };
+
+//     const updateDocumentResult = await usersCollection.updateOne(filter, updateDocument);
+
+//     res.send({
+//       success: true,
+//       subscriptionId: result.insertedId,
+//       userUpdate: updateDocumentResult
+//     });
+
+//   } catch (error) {
+//     console.error("Subscription Error:", error);
+//     res.status(500).send({ error: "Something went wrong" });
+//   }
+// });
 
 
+// ff ////
 
 
 
