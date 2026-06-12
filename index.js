@@ -224,8 +224,6 @@ app.get('/api/jobs', async(req, res)=>{
     })
 
 
-    
-
    app.get('/api/my/companies', async (req, res) => {
             const query = {};
             if (req.query.recruiterId) {
@@ -235,6 +233,21 @@ app.get('/api/jobs', async(req, res)=>{
 
             res.send(result || {});
         })
+
+    app.patch('/api/companies/:id', async(req, res)=>{
+      const id = req.params.id
+      const updatedCompany = req.body
+       const filter = {_id :new ObjectId(_id)}
+       const updateDoc = {
+        $set:{
+          status : updatedCompany.status
+        }
+       }
+       const result = await companyCollection.updateOne(filter, updateDoc)
+       res.send(result)
+    })
+      
+
 
 
 
