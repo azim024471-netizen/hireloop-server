@@ -151,7 +151,7 @@ app.get('/api/jobs', async(req, res)=>{
 
     const updateDocument ={
       $set: {
-  plan: data.planId // বা ফ্রন্টএন্ড অনুযায়ী সঠিক স্পেলিং
+  plan: data.planId 
 }
     }
    
@@ -215,14 +215,74 @@ app.get('/api/jobs', async(req, res)=>{
       res.send(result)
     })
 
+
+
     app.get('/api/companies', async(req, res)=>{
       const cursor = companyCollection.find();
+      const companies = await cursor.toArray();
 
-      const result = await cursor.toArray();
+      for(company of companies){
+         const filter ={
+          companyId : company._id.toString()
 
-      res.send(result)
+         }
+        const jobCout = await jobsCollection.countDocuments(filter);
+        company.jobCount = jobCout
+      }
+
+
+      res.send(companies)
     })
 
+    // app.get('/api/companies', async(req, res)=>{
+    //   const cursor = companyCollection.find();
+
+    //   const result = await cursor.toArray();
+
+    //   res.send(result)
+    // })
+   // inefficient way to join/aggregate collection
+        app.get('/api/companies2', async (req, res) => {
+            const pipeline = [
+                {
+                    $skip: 5
+                }
+            ];
+
+            const cursor = companyCollection.aggregate(pipeline);
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+
+           
+        // extra ///////////////
+
+          app.get('/api/stats', async (req, res) => {
+            const pipeline = [
+                {
+                    $group: {
+                        _id: '$jobType',
+                        count: {
+                            $sum: 1
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        jobType: '$_id',
+                        _id: 0,
+                        count: 1
+                    }
+                },
+                {
+                    $sort: { count: 1 }
+                }
+            ]
+
+            const cursor = jobCollection.aggregate(pipeline);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
 
    app.get('/api/my/companies', async (req, res) => {
             const query = {};
@@ -234,19 +294,21 @@ app.get('/api/jobs', async(req, res)=>{
             res.send(result || {});
         })
 
-    app.patch('/api/companies/:id', async(req, res)=>{
-      const id = req.params.id
-      const updatedCompany = req.body
-       const filter = {_id :new ObjectId(_id)}
-       const updateDoc = {
-        $set:{
-          status : updatedCompany.status
+
+app.patch('/api/companies/:id', async(req, res)=>{
+     const id = req.params.id; 
+     const updatedCompany = req.body;
+     
+     const filter = { _id: new ObjectId(id) }; 
+     
+     const updateDoc = {
+        $set: {
+           status : updatedCompany.status
         }
-       }
-       const result = await companyCollection.updateOne(filter, updateDoc)
-       res.send(result)
-    })
-      
+     };
+     const result = await companyCollection.updateOne(filter, updateDoc);
+     res.send(result);
+});
 
 
 
